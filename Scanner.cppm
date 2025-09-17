@@ -55,7 +55,10 @@ export class Scanner {
 
 	inline char peekNext() { if (current + 1 >= source.size()) return '\0'; return source[current + 1]; }
 
-	inline void addToken(TokenType type) { addToken(type, 0); }
+	void addToken(TokenType type) {
+		std::string text = source.substr(start, current - start);
+		tokens.push_back(Token(type, text, line));
+	}
 	void addToken(TokenType type, std::string lit) {
 		std::string text = source.substr(start, current - start);
 		tokens.push_back(Token(type, text, lit, line));
@@ -88,7 +91,7 @@ public:
 			scanToken();
 		}
 
-		tokens.push_back(Token(TokenType::Eof, "", 0, line));
+		tokens.push_back(Token(TokenType::Eof, "", line));
 		return tokens;
 	}
 };
@@ -100,7 +103,7 @@ void Scanner::string() {
 	}
 
 	if (isAtEnd()) {
-		error(line, "Unterminated string.");
+		Error::error(line, "Unterminated string.");
 		return;
 	}
 
@@ -194,7 +197,7 @@ void Scanner::scanToken() {
 				identifier();
 			}
 			else {
-				error(line, "Unexpected character.");
+				Error::error(line, "Unexpected character.");
 			}
 			break;
 	}

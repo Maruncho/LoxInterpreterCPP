@@ -2,8 +2,9 @@
 export module Token;
 
 import <string>;
-import <variant>;
 import <iostream>;
+
+export import Object;
 
 export enum class TokenType
 {
@@ -81,14 +82,20 @@ std::string token_to_string(TokenType t) {
 export struct Token {
 	TokenType type;
 	std::string lexeme;
-	std::variant<double, std::string> literal;
+	Object literal;
 	int line;
 
 	Token(TokenType typ, std::string lex, double lit, int ln)
 		: type{typ}, lexeme{lex}, literal{lit}, line{ln} {}
 
+	Token(TokenType typ, std::string lex, bool lit, int ln)
+		: type{typ}, lexeme{lex}, literal{lit}, line{ln} {}
+
 	Token(TokenType typ, std::string lex, std::string lit, int ln)
 		: type{typ}, lexeme{lex}, literal{lit}, line{ln} {}
+
+	Token(TokenType typ, std::string lex, int ln)
+		: type{typ}, lexeme{lex}, literal{Object()}, line{ln} { }
 };
 
 export std::ostream& operator<<(std::ostream& os, const Token& t) {
