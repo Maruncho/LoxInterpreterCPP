@@ -141,6 +141,8 @@
     <ClCompile Include="Object.cppm" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="Parser.cppm" />
+    <ClCompile Include="Resolver.cpp" />
+    <ClCompile Include="Resolver.cppm" />
     <ClCompile Include="Scanner.cppm" />
     <ClCompile Include="Stmt.cpp" />
     <ClCompile Include="Stmt.cppm" />

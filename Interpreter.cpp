@@ -55,15 +55,26 @@ Interpreter::Interpreter() : topLevel{ Environment(&globals, true) }, environmen
 	globals.define("clock", new NativeFn(NativeFunction::clock, 0));
 }
 
+Object Interpreter::lookUpVariable(Token name, const Expr* expr) {
+	auto distance = locals.find(const_cast<Expr*>(expr)); //don't do that, but I don't want to fix it.
+	if (distance != locals.end()) {
+		return environment->getAt(distance->second, name.lexeme);
+	}
+	else {
+		return environment->get(name);
+	}
+}
 
 void Interpreter::interpret(std::vector<Stmt*> statements) {
 	try {
 		for (const Stmt* statement : statements) {
 			execute(statement);
 		}
+		locals.clear();
 	}
 	catch (Error::RuntimeError& error) {
 		Error::runtimeError(error);
+		locals.clear();
 	}
 }
 
@@ -172,12 +183,20 @@ Object Interpreter::visitCallExpr(const Call* expr) {
 }
 
 Object Interpreter::visitVariableExpr(const Variable* expr) {
-	return environment->get(expr->nam);
+	return lookUpVariable(expr->nam, expr);
 }
 
 Object Interpreter::visitAssignExpr(const Assign* expr) {
 	Object value = evaluate(expr->val);
-	environment->assign(expr->id, value);
+
+	auto distance = locals.find(const_cast<Assign*>(expr));
+	if (distance != locals.end()) {
+		environment->assignAt(distance->second, expr->id, value);
+	}
+	else {
+		environment->assign(expr->id, value);
+	}
+
 	return value;
 }
 

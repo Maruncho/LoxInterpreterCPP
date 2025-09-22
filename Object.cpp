@@ -22,7 +22,7 @@ Object::Object(LoxCallable* fn) : val{ fn } { }
 
 Object::Object(const Object& other) : val{ other.val } {
 	if (other.isCallable()) {
-		std::cout << other.getCallablePtr()->toString() << " " << other.getCallablePtr()->refs << "->" << other.getCallablePtr()->refs + 1 << "\n";
+		//std::cout << other.getCallablePtr()->toString() << " " << other.getCallablePtr()->refs << "->" << other.getCallablePtr()->refs + 1 << "\n";
 		other.getCallablePtr()->refs++;
 	}
 }
@@ -33,7 +33,7 @@ Object::Object(Object&& other) : val { other.val } {
 
 Object& Object::operator=(Object& other) {
 	if (other.isCallable()) {
-		std::cout << other.getCallablePtr()->toString() << " " << other.getCallablePtr()->refs << "->" << other.getCallablePtr()->refs + 1 << "\n";
+		//std::cout << other.getCallablePtr()->toString() << " " << other.getCallablePtr()->refs << "->" << other.getCallablePtr()->refs + 1 << "\n";
 		other.getCallablePtr()->refs++;
 	}
 	val = other.val;
@@ -50,11 +50,11 @@ Object::~Object() {
 	if (isCallable()) {
 		LoxCallable* ptr = getCallablePtr();
 		if (ptr->refs == 1) {
-			std::cout << ptr->toString() << " got deleted!\n";
+			//std::cout << ptr->toString() << " got deleted!\n";
 			delete ptr;
 		}
 		else {
-			std::cout << ptr->toString() << " " << ptr->refs << "->" << ptr->refs - 1 << "\n";
+			//std::cout << ptr->toString() << " " << ptr->refs << "->" << ptr->refs - 1 << "\n";
 			ptr->refs--;
 		}
 	}

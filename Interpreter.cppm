@@ -22,6 +22,8 @@ private:
 	Environment topLevel;
 	Environment* environment;
 
+	std::unordered_map<const Expr*, int> locals;
+
 	inline Object evaluate(const Expr* expr) {
 		return expr->accept(this);
 	}
@@ -46,12 +48,18 @@ private:
 		throw Error::RuntimeError(oper, "Operands must be numbers.");
 	}
 
+	Object lookUpVariable(Token name, const Expr* expr);
+
 public:
 	Interpreter();
 
 	void interpret(std::vector<Stmt*> statements);
 
 	void executeBlock(const std::vector<Stmt*> statements, Environment* environment);
+
+	inline void resolve(const Expr* expr, int depth) {
+		locals[expr] = depth;
+	}
 
 	Object visitLiteralExpr(const Literal* expr) override;
 	Object visitLogicalExpr(const Logical* expr) override;

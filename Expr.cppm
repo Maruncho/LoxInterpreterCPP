@@ -48,6 +48,7 @@ public:
 	Expr& operator=(Expr&) = delete;
 
 	virtual Object accept(ExprVisitor<Object>* visitor) const = 0;
+	virtual void accept(ExprVisitor<void>* visitor) const = 0;
 };
 
 export struct Binary : public Expr {
@@ -58,6 +59,7 @@ export struct Binary : public Expr {
 	Binary(Expr* left, Token oper, Expr* right);
 	~Binary();
 	Object accept(ExprVisitor<Object>* visitor) const override;
+	void accept(ExprVisitor<void>* visitor) const override;
 };
 
 export struct Assign : public Expr {
@@ -67,6 +69,7 @@ export struct Assign : public Expr {
 	Assign(Token name, Expr* value);
 	~Assign();
 	Object accept(ExprVisitor<Object>* visitor) const override;
+	void accept(ExprVisitor<void>* visitor) const override;
 };
 
 export struct Call : public Expr {
@@ -77,6 +80,7 @@ export struct Call : public Expr {
 	Call(Expr* callee, Token paren, std::vector<Expr*> arguments);
 	~Call();
 	Object accept(ExprVisitor<Object>* visitor) const override;
+	void accept(ExprVisitor<void>* visitor) const override;
 };
 
 export struct Get : public Expr {
@@ -86,6 +90,7 @@ export struct Get : public Expr {
 	Get(Expr* object, Token name);
 	~Get();
 	Object accept(ExprVisitor<Object>* visitor) const override;
+	void accept(ExprVisitor<void>* visitor) const override;
 };
 
 export struct Grouping : public Expr {
@@ -94,6 +99,7 @@ export struct Grouping : public Expr {
 	Grouping(Expr* expression);
 	~Grouping();
 	Object accept(ExprVisitor<Object>* visitor) const override;
+	void accept(ExprVisitor<void>* visitor) const override;
 };
 
 export struct Literal : public Expr {
@@ -102,6 +108,7 @@ export struct Literal : public Expr {
 	Literal();
 	Literal(Object value);
 	Object accept(ExprVisitor<Object>* visitor) const override;
+	void accept(ExprVisitor<void>* visitor) const override;
 };
 
 export struct Logical : public Expr {
@@ -112,6 +119,7 @@ export struct Logical : public Expr {
 	Logical(Expr* left, Token oper, Expr* right);
 	~Logical();
 	Object accept(ExprVisitor<Object>* visitor) const override;
+	void accept(ExprVisitor<void>* visitor) const override;
 };
 
 export struct Set : public Expr {
@@ -122,6 +130,7 @@ export struct Set : public Expr {
 	Set(Expr* object, Token oper, Expr* value);
 	~Set();
 	Object accept(ExprVisitor<Object>* visitor) const override;
+	void accept(ExprVisitor<void>* visitor) const override;
 };
 
 export struct Super : public Expr {
@@ -130,6 +139,7 @@ export struct Super : public Expr {
 
 	Super(Token keyword, Token method);
 	Object accept(ExprVisitor<Object>* visitor) const override;
+	void accept(ExprVisitor<void>* visitor) const override;
 };
 
 export struct This : public Expr {
@@ -137,6 +147,7 @@ export struct This : public Expr {
 
 	This(Token keyword);
 	Object accept(ExprVisitor<Object>* visitor) const override;
+	void accept(ExprVisitor<void>* visitor) const override;
 };
 
 export struct Unary : public Expr {
@@ -146,6 +157,7 @@ export struct Unary : public Expr {
 	Unary(Token oper, Expr* right);
 	~Unary();
 	Object accept(ExprVisitor<Object>* visitor) const override;
+	void accept(ExprVisitor<void>* visitor) const override;
 };
 
 export struct Variable : public Expr {
@@ -154,5 +166,6 @@ export struct Variable : public Expr {
 	Variable(Token name);
 	inline Variable copy() { return Variable(nam); }
 	Object accept(ExprVisitor<Object>* visitor) const override;
+	void accept(ExprVisitor<void>* visitor) const override;
 };
 

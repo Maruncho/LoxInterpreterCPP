@@ -7,6 +7,7 @@ import <vector>;
 
 import Scanner;
 import Parser;
+import Resolver;
 import Interpreter;
 import Token;
 import Error;
@@ -17,6 +18,11 @@ void run(std::string source, Interpreter& interpreter) {
 
 	Parser parser = Parser(tokens);
 	std::vector<Stmt*> statements = parser.parse();
+
+	if (Error::hadError) return;
+
+	Resolver resolver = Resolver(interpreter);
+	resolver.resolve(statements);
 
 	// Stop if there was a syntax error.
 	if (!Error::hadError) {
@@ -57,7 +63,7 @@ void runPrompt(Interpreter& interpreter) {
 int main(int argc, char* argv[]) {
 	Interpreter interpreter = Interpreter();
 
-	/*
+	
 	if (argc > 2) {
 		std::cout << "Usage: cpplox [script]\n";
 		return 64;
@@ -68,9 +74,9 @@ int main(int argc, char* argv[]) {
 	else {
 		runPrompt(interpreter);
 	}
-	*/
+	
 
-	while (true) {
-		runFile("example.lox", interpreter);
-	}
+	//while (true) {
+	//	runFile("example.lox", interpreter);
+	//}
 }
