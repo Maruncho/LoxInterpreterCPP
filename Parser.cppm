@@ -11,9 +11,13 @@ import Error;
 
 export class ParseError {};
 
+export enum class FnType {
+	FUNCTION
+};
+
 export class Parser {
 	const std::vector<Token>& tokens;
-	int current = 0;
+	int current;
 
 	inline Token peek() {
 		return tokens[current];
@@ -27,221 +31,74 @@ export class Parser {
 		return peek().type == TokenType::Eof;
 	}
 
-	bool check(TokenType type) {
+	inline bool check(TokenType type) {
 		if (isAtEnd()) return false;
 		return peek().type == type;
 	}
 
-	Token advance() {
+	inline Token advance() {
 		if (!isAtEnd()) current++;
 		return previous();
 	}
 
-	bool match(std::initializer_list<TokenType> types) {
-		for (const TokenType type : types) {
-			if (check(type)) {
-				advance();
-				return true;
-			}
-		}
-		return false;
-	}
+	bool match(std::initializer_list<TokenType> types);
 
-	ParseError error(Token token, std::string message) {
-		Error::error(token, message);
-		return ParseError();
-	}
+	ParseError error(Token token, std::string message);
 
-	Token consume(TokenType type, std::string message) {
-		if (check(type)) return advance();
+	Token consume(TokenType type, std::string message);
 
-		throw error(peek(), message);
-	}
+	Expr* expression();
 
-	Expr* expression() {
-		return assignment();
-	}
+	Expr* assignment();
 
-	Expr* assignment() {
-		Expr* expr = equality();
+	Expr* lOr();
 
-		if (match({ TokenType::EQUAL })) {
-			Token equals = previous();
-			Expr* value = assignment();
+	Expr* lAnd();
 
-			if (auto var = dynamic_cast<Variable*>(expr)) {
-				Token name = var->nam;
-				return new Assign(name, value);
-			}
+	Expr* equality();
 
-			error(equals, "Invalid assignment target.");
-		}
+	Expr* comparison();
 
-		return expr;
-	}
+	Expr* term();
 
-	Expr* equality() {
-		Expr* expr = comparison();
+	Expr* factor();
 
-		while (match({ TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL })) {
-			Token oper = previous();
-			Expr* right = comparison();
-			expr = new Binary(expr, oper, right);
-		}
-		return expr;
-	}
+	Expr* unary();
 
-	Expr* comparison() {
-		Expr* expr = term();
+	Expr* call();
 
-		while (match({ TokenType::GREATER, TokenType::GREATER_EQUAL, TokenType::LESS, TokenType::LESS_EQUAL })) {
-			Token oper = previous();
-			Expr* right = term();
-			expr = new Binary(expr, oper, right);
-		}
-		return expr;
-	}
+	Expr* finishCall(Expr* callee);
 
-	Expr* term() {
-		Expr* expr = factor();
-
-		while (match({ TokenType::MINUS, TokenType::PLUS })) {
-			Token oper = previous();
-			Expr* right = factor();
-			expr = new Binary(expr, oper, right);
-		}
-		return expr;
-	}
-
-	Expr* factor() {
-		Expr* expr = unary();
-
-		while (match({ TokenType::SLASH, TokenType::STAR })) {
-			Token oper = previous();
-			Expr* right = unary();
-			expr = new Binary(expr, oper, right);
-		}
-		return expr;
-	}
-
-	Expr* unary() {
-		if (match({ TokenType::BANG, TokenType::MINUS })) {
-			Token oper = previous();
-			Expr* right = unary();
-			return new Unary(oper, right);
-		}
-
-		return primary();
-	}
-
-	Expr* primary() {
-		if (match({ TokenType::FALSE })) return new Literal(false);
-		if (match({ TokenType::TRUE })) return new Literal(true);
-		if (match({ TokenType::NIL })) return new Literal();
-
-		if (match({ TokenType::NUMBER, TokenType::STRING })) {
-			return new Literal(previous().literal);
-		}
-
-		if (match({ TokenType::IDENTIFIER })) {
-			return new Variable(previous());
-		}
-
-		if (match({ TokenType::LEFT_PAREN })) {
-			Expr* expr = expression();
-			consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
-			return new Grouping(expr);
-		}
-
-		throw error(peek(), "Expect expression.");
-	}
+	Expr* primary();
 
 /////////////// STATEMENTS ////////////////////
 
-	std::vector<Stmt*> block() {
-		std::vector<Stmt*> statements;
+	std::vector<Stmt*> block();
 
-		while (!check({ TokenType::RIGHT_BRACE }) && !isAtEnd()) {
-			statements.emplace_back(declaration());
-		}
+	Stmt* declaration();
 
-		consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
-		return statements;
-	}
+	Stmt* function(FnType);
 
-	Stmt* declaration() {
-		try {
-			if (match({ TokenType::VAR })) return varDeclaration();
+	Stmt* varDeclaration();
 
-			return statement();
-		}
-		catch (ParseError) {
-			synchronize();
-			return nullptr;
-		}
-	}
+	Stmt* statement();
 
-	Stmt* varDeclaration() {
-		Token name = consume(TokenType::IDENTIFIER, "Expect variable name.");
+	Stmt* forStatement();
 
-		Expr* initializer = nullptr;
-		if (match({ TokenType::EQUAL })) {
-			initializer = expression();
-		}
+	Stmt* ifStatement();
 
-		consume(TokenType::SEMICOLON, "Expect ';' after variable declaration.");
-		return new Var(name, initializer);
-	}
+	Stmt* printStatement();
 
-	Stmt* statement() {
-		if (match({ TokenType::PRINT })) return printStatement();
-		if (match({ TokenType::LEFT_BRACE })) return new Block(block());
+	Stmt* returnStatement();
 
-		return expressionStatement();
-	}
+	Stmt* whileStatement();
 
-	Stmt* printStatement() {
-		Expr* value = expression();
-		consume(TokenType::SEMICOLON, "Expect ';' after value.");
-		return new Print(value);
-	}
+	Stmt* expressionStatement();
 
-	Stmt* expressionStatement() {
-		Expr* expr = expression();
-		consume(TokenType::SEMICOLON, "Expect ';' after expression.");
-		return new Expression(expr);
-	}
-
-	void synchronize() {
-		advance();
-
-		while (!isAtEnd()) {
-			if (previous().type == TokenType::SEMICOLON) return;
-
-			switch (peek().type) {
-				case TokenType::CLASS:
-				case TokenType::FUN:
-				case TokenType::VAR:
-				case TokenType::FOR:
-				case TokenType::IF:
-				case TokenType::WHILE:
-				case TokenType::PRINT:
-				case TokenType::RETURN:
-					return;
-			}
-
-			advance();
-		}
-	}
+	void synchronize();
 
 public:
-	Parser(std::vector<Token>& tokens) : tokens{tokens} { }
+	Parser(std::vector<Token>& tokens);
 
-	std::vector<Stmt*> parse() {
-		std::vector<Stmt*> statements;
-		while (!isAtEnd()) {
-			statements.emplace_back(declaration());
-		}
-		return statements;
-	}
+	std::vector<Stmt*> parse();
 };

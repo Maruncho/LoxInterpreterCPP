@@ -119,6 +119,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -130,18 +131,29 @@
   <ItemGroup>
     <ClCompile Include="Environment.cppm" />
     <ClCompile Include="Error.cppm" />
+    <ClCompile Include="Expr.cpp" />
     <ClCompile Include="Expr.cppm" />
+    <ClCompile Include="Interpreter.cpp" />
     <ClCompile Include="Interpreter.cppm" />
     <ClCompile Include="main.cppm" />
+    <ClCompile Include="NativeFunctions.cppm" />
+    <ClCompile Include="Object.cpp" />
     <ClCompile Include="Object.cppm" />
+    <ClCompile Include="Parser.cpp" />
     <ClCompile Include="Parser.cppm" />
+    <ClCompile Include="Scanner.cppm" />
+    <ClCompile Include="Stmt.cpp" />
     <ClCompile Include="Stmt.cppm" />
+    <ClCompile Include="Token.cpp" />
     <ClCompile Include="Token.cppm" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Scanner.cppm">
+    <ClCompile Include="Scanner.cpp">
       <FileType>Document</FileType>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="example.lox" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

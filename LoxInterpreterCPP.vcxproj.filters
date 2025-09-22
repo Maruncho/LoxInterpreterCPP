@@ -18,10 +18,10 @@
     <ClCompile Include="main.cppm">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Token.cppm">
+    <ClCompile Include="Token.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Scanner.cppm">
+    <ClCompile Include="Scanner.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="Error.cppm">
@@ -33,17 +33,44 @@
     <ClCompile Include="Stmt.cppm">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Parser.cppm">
+    <ClCompile Include="Parser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Object.cppm">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Interpreter.cppm">
+    <ClCompile Include="Interpreter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Environment.cppm">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Token.cppm">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Stmt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scanner.cppm">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Parser.cppm">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Interpreter.cppm">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Expr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NativeFunctions.cppm">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="example.lox" />
   </ItemGroup>
 </Project>

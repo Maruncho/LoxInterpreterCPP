@@ -19,13 +19,19 @@ void run(std::string source, Interpreter& interpreter) {
 	std::vector<Stmt*> statements = parser.parse();
 
 	// Stop if there was a syntax error.
-	if (Error::hadError) return;
+	if (!Error::hadError) {
+		interpreter.interpret(statements);
+	}
 
-	interpreter.interpret(statements);
+	for (auto x : statements) {
+		delete x;
+	}
+
 }
 
 int runFile(std::string path, Interpreter& interpreter) {
 	std::ifstream input{path};
+	if (!input) return 69;
 	std::stringstream buffer;
 	buffer << input.rdbuf();
 	run(buffer.str(), interpreter);
@@ -50,6 +56,8 @@ void runPrompt(Interpreter& interpreter) {
 
 int main(int argc, char* argv[]) {
 	Interpreter interpreter = Interpreter();
+
+	/*
 	if (argc > 2) {
 		std::cout << "Usage: cpplox [script]\n";
 		return 64;
@@ -59,5 +67,10 @@ int main(int argc, char* argv[]) {
 	}
 	else {
 		runPrompt(interpreter);
+	}
+	*/
+
+	while (true) {
+		runFile("example.lox", interpreter);
 	}
 }

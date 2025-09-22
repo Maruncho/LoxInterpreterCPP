@@ -23,7 +23,7 @@ public:
 	virtual R visitBlockStmt(const Block* stmt) = 0;
     virtual R visitClassStmt(const Class* stmt) = 0;
     virtual R visitExpressionStmt(const Expression* stmt) = 0;
-    virtual R visitFunctionStmt(const Function* stmt) = 0;
+    virtual R visitFunctionStmt(Function* stmt) = 0;
     virtual R visitIfStmt(const If* stmt) = 0;
     virtual R visitPrintStmt(const Print* stmt) = 0;
     virtual R visitReturnStmt(const Return* stmt) = 0;
@@ -34,11 +34,11 @@ public:
 
 export class Stmt {
 protected:
-	Stmt() {}
+	Stmt();
 public:
-	virtual ~Stmt() {}
+	virtual ~Stmt();
 	Stmt(Stmt&) = delete;
-	Stmt(Stmt&&) = delete;
+	Stmt& operator=(Stmt&) = delete;
 
 	virtual void accept(StmtVisitor<void>* visitor) const = 0;
 };
@@ -46,53 +46,37 @@ public:
 export struct Block : public Stmt {
 	const std::vector<Stmt*> stmts;
 
-	Block(std::vector<Stmt*> statements) : stmts{statements} {}
-
-	~Block() {
-		for (Stmt* x : stmts) {
-			delete x;
-		}
-	}
-
-	void accept(StmtVisitor<void>* visitor) const override { return visitor->visitBlockStmt(this); }
+	Block(std::vector<Stmt*> statements);
+	~Block();
+	void accept(StmtVisitor<void>* visitor) const override;
 };
 
 export struct Function : public Stmt {
 	const Token id;
 	const std::vector<Token> params;
-	const std::vector<Stmt*> body;
+	std::vector<Stmt*> body;
 
-	Function(Token name, std::vector<Token> parameters, std::vector<Stmt*> fnBody)
-		: id{name}, params{parameters}, body{fnBody} { }
-
-	~Function() {
-		for (Stmt* x : body) {
-			delete x;
-		}
-	}
-
-	void accept(StmtVisitor<void>* visitor) const override { return visitor->visitFunctionStmt(this); }
+	Function(Token name, std::vector<Token> parameters, std::vector<Stmt*> fnBody);
+	~Function();
+	Function* release();
+	void accept(StmtVisitor<void>* visitor) const override;
 };
 
 export struct Class : public Stmt {
 	const Token nam;
-	const Variable super;
+	const Variable& super;
 	const std::vector<Function> meths;
 
-	Class(Token name, Variable superclass, std::vector<Function> methods)
-		: nam{name}, super{superclass.copy()}, meths{std::move(methods)} { }
+	Class(Token name, Variable& superclass, std::vector<Function> methods);
+	void accept(StmtVisitor<void>* visitor) const override;
 };
 
 export struct Expression : public Stmt {
 	const Expr* expr;
 
-	Expression(Expr* expression) : expr{expression} { }
-
-	~Expression() {
-		delete expr;
-	}
-
-	void accept(StmtVisitor<void>* visitor) const override { return visitor->visitExpressionStmt(this); }
+	Expression(Expr* expression);
+	~Expression();
+	void accept(StmtVisitor<void>* visitor) const override;
 };
 
 export struct If : public Stmt {
@@ -100,68 +84,43 @@ export struct If : public Stmt {
 	const Stmt* th;
 	const Stmt* el;
 
-	If(Expr* condition, Stmt* thenBranch, Stmt* elseBranch)
-		: cond{condition}, th{thenBranch}, el{elseBranch} { }
-
-	~If() {
-		delete cond;
-		delete th;
-		delete el;
-	}
-
-	void accept(StmtVisitor<void>* visitor) const override { return visitor->visitIfStmt(this); }
+	If(Expr* condition, Stmt* thenBranch, Stmt* elseBranch);
+	~If();
+	void accept(StmtVisitor<void>* visitor) const override;
 };
 
 export struct Print : public Stmt {
 	const Expr* expr;
 
-	Print(Expr* expression) : expr{expression} { }
-
-	~Print() {
-		delete expr;
-	}
-
-	void accept(StmtVisitor<void>* visitor) const override { return visitor->visitPrintStmt(this); }
+	Print(Expr* expression);
+	~Print();
+	void accept(StmtVisitor<void>* visitor) const override;
 };
 
 export struct Return : public Stmt {
 	const Token keywrd;
 	const Expr* val;
 
-	Return(Token keyword, Expr* value) : keywrd{keyword}, val{value} { }
-
-	~Return() {
-		delete val;
-	}
-
-	void accept(StmtVisitor<void>* visitor) const override { return visitor->visitReturnStmt(this); }
+	Return(Token keyword, Expr* value);
+	~Return();
+	void accept(StmtVisitor<void>* visitor) const override;
 };
 
 export struct Var : public Stmt {
 	const Token id;
 	const Expr* init;
 
-	Var(Token name, Expr* initializer) : id{name}, init{initializer} { }
-
-	~Var() {
-		if(init) delete init;
-	}
-
-	void accept(StmtVisitor<void>* visitor) const override { return visitor->visitVarStmt(this); }
+	Var(Token name, Expr* initializer);
+	~Var();
+	void accept(StmtVisitor<void>* visitor) const override;
 };
 
 export struct While : public Stmt {
 	const Expr* cond;
 	const Stmt* body;
 
-	While(Expr* condition, Stmt* whileBody)
-		: cond{condition}, body{whileBody} { }
-
-	~While() {
-		delete cond;
-		delete body;
-	}
-
-	void accept(StmtVisitor<void>* visitor) const override { visitor->visitWhileStmt(this); }
+	While(Expr* condition, Stmt* whileBody);
+	~While();
+	void accept(StmtVisitor<void>* visitor) const override;
 };
 

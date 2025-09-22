@@ -37,7 +37,7 @@ export namespace Error {
 	}
 
 	void runtimeError(RuntimeError error) {
-		std::cerr << "\n[line " << error.token.line << "]";
+		std::cerr << error.message << "\n[line " << error.token.line << "]\n";
 		hadRuntimeError = true;
 	}
 }
