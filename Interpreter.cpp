@@ -5,6 +5,7 @@ import Interpreter;
 import <iostream>;
 import <string>;
 import <vector>;
+import <unordered_map>;
 
 import Expr;
 import Stmt;
@@ -15,7 +16,7 @@ import NativeFunctions;
 ReturnFromLoxFn::ReturnFromLoxFn(Object val) : value{ val } { }
 
 void Interpreter::executeBlock(const std::vector<Stmt*> statements, Environment* environment) {
-	Environment* previous = this->environment;
+	auto previous = this->environment;
 	try {
 		this->environment = environment;
 
@@ -24,13 +25,9 @@ void Interpreter::executeBlock(const std::vector<Stmt*> statements, Environment*
 		}
 
 		this->environment = previous;
-		environment->destroy();
 	}
 	catch (ReturnFromLoxFn ret) {
 		this->environment = previous;
-		if (!ret.value.isCallable()) {
-			environment->destroy();
-		}
 		throw;
 	}
 }
@@ -51,8 +48,15 @@ void Interpreter::checkNumberOperands(Token oper, Object left, Object right) {
 	throw Error::RuntimeError(oper, "Operands must be numbers.");
 }
 
-Interpreter::Interpreter() : topLevel{ Environment(&globals, true) }, environment{&topLevel} {
+Interpreter::Interpreter(GC& gc) : environment{ gc.track(new Environment(&globals, true)) }, gc{ gc } {
 	globals.define("clock", new NativeFn(NativeFunction::clock, 0));
+}
+Interpreter::~Interpreter() {
+	for (auto& [_, x] : globals.values) {
+		if (x.isCallable()) {
+			delete x.getCallablePtr();
+		}
+	}
 }
 
 Object Interpreter::lookUpVariable(Token name, const Expr* expr) {
@@ -69,11 +73,14 @@ void Interpreter::interpret(std::vector<Stmt*> statements) {
 	try {
 		for (const Stmt* statement : statements) {
 			execute(statement);
+			gc.runFromEnv(environment);
 		}
+
 		locals.clear();
 	}
 	catch (Error::RuntimeError& error) {
 		Error::runtimeError(error);
+
 		locals.clear();
 	}
 }
@@ -200,10 +207,32 @@ Object Interpreter::visitAssignExpr(const Assign* expr) {
 	return value;
 }
 
-Object Interpreter::visitGetExpr(const Get* expr) { return Object(); }
-Object Interpreter::visitSetExpr(const Set* expr) { return Object(); }
+Object Interpreter::visitGetExpr(const Get* expr) {
+	Object object = evaluate(expr->obj);
+	if (object.isLoxInstance()) {
+		return object.getLoxInstancePtr()->get(expr->id);
+	}
+
+	throw Error::RuntimeError(expr->id, "Only instances have properties.");
+}
+
+Object Interpreter::visitSetExpr(const Set* expr) {
+	Object object = evaluate(expr->obj);
+
+	if (!(object.isLoxInstance())) {
+		throw Error::RuntimeError(expr->name, "Only instances have fields.");
+	}
+
+	Object value = evaluate(expr->val);
+	object.getLoxInstancePtr()->set(expr->name, value);
+	return value;
+}
+
 Object Interpreter::visitSuperExpr(const Super* expr) { return Object(); }
-Object Interpreter::visitThisExpr(const This* expr) { return Object(); }
+
+Object Interpreter::visitThisExpr(const This* expr) {
+	return lookUpVariable(expr->keywrd, expr);
+}
 
 /////////////////STATEMENTS///////////////////
 
@@ -226,7 +255,7 @@ void Interpreter::visitVarStmt(const Var* stmt) {
 }
 
 void Interpreter::visitBlockStmt(const Block* stmt) {
-	Environment* newEnv = new Environment(environment);
+	auto newEnv = gc.track(new Environment(environment));
 	executeBlock(stmt->stmts, newEnv);
 }
 
@@ -246,7 +275,7 @@ void Interpreter::visitWhileStmt(const While* stmt) {
 }
 
 void Interpreter::visitFunctionStmt(Function* stmt) {
-	LoxFn* function = new LoxFn(stmt->release(), environment);
+	Object function = gc.track(new LoxFn(stmt, environment, *this, false));
 	environment->define(stmt->id.lexeme, function);
 }
 
@@ -254,13 +283,19 @@ void Interpreter::visitReturnStmt(const Return* stmt) {
 	Object value = Object();
 	if (stmt->val) value = evaluate(stmt->val);
 
-	//If closure is returned, remove one ref, because the environment it holds references it and thus can never reach 1 ref to get deleted eventually
-	if (value.isCallable()) {
-		value.getCallablePtr()->refs--;
-		value.getCallablePtr()->hasBeenReturned = true;
-	}
-
 	throw ReturnFromLoxFn(value);
 }
 
-void Interpreter::visitClassStmt(const Class* stmt) {}
+void Interpreter::visitClassStmt(const Class* stmt) {
+	environment->define(stmt->nam.lexeme, Object());
+
+	std::unordered_map<std::string, LoxFn*> methods;
+	for (Function* method : stmt->meths) {
+		bool isInit = method->id.lexeme == "init";
+		auto function = gc.track(new LoxFn(method, environment, *this, isInit));
+		methods[method->id.lexeme] = function;
+	}
+
+	Object klass = gc.track(new LoxClass(stmt->nam.lexeme, methods));
+	environment->assign(stmt->nam, klass);
+}

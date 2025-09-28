@@ -8,16 +8,29 @@ import <string>;
 import Expr;
 import Stmt;
 import Interpreter;
+import GC;
 
 enum class FunctionType {
 	NONE,
-	FUNCTION
+	FUNCTION,
+	INITIALIZER,
+	METHOD
+};
+
+enum class ClassType {
+	NONE,
+	CLASS
 };
 
 export class Resolver : public ExprVisitor<void>, public StmtVisitor<void> {
 	Interpreter& interpreter;
+	GC& gc;
 	std::vector<std::unordered_map<std::string, bool>> scopes;
+	
 	FunctionType currentFunction = FunctionType::NONE;
+	ClassType currentClass = ClassType::NONE;
+
+	Function* lastFunction = nullptr;
 
 	void resolveLocal(const Expr* expr, Token name) const;
 	void resolveFunction(Function* function, FunctionType type);
@@ -46,10 +59,12 @@ export class Resolver : public ExprVisitor<void>, public StmtVisitor<void> {
 	}
 
 public:
-	Resolver(Interpreter& interpreter);
+	Resolver(Interpreter& interpreter, GC& gc);
 
-	inline void resolve(const std::vector<Stmt*>& statements) {
-		for (Stmt* stmt : statements) {
+	std::vector<std::pair<Function*, Function*>> functions;
+
+	inline void resolve(const std::vector<Stmt*>& stmts) {
+		for (Stmt* stmt : stmts) {
 			resolve(stmt);
 		}
 	}

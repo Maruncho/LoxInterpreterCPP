@@ -133,6 +133,8 @@
     <ClCompile Include="Error.cppm" />
     <ClCompile Include="Expr.cpp" />
     <ClCompile Include="Expr.cppm" />
+    <ClCompile Include="GC.cpp" />
+    <ClCompile Include="GC.cppm" />
     <ClCompile Include="Interpreter.cpp" />
     <ClCompile Include="Interpreter.cppm" />
     <ClCompile Include="main.cppm" />

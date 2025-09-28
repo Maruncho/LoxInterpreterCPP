@@ -10,10 +10,20 @@ import Expr;
 import Stmt;
 import Error;
 
+ParseResult::ParseResult(std::vector<Stmt*> stmts) : stmts{ stmts } {}
+ParseResult::~ParseResult() {
+	for (auto x : stmts) {
+		if (dynamic_cast<Function*>(x))
+			continue;
+		delete x;
+	}
+	stmts.clear();
+}
 
 std::string fnType_toString(FnType type) {
 	switch (type) {
 		case FnType::FUNCTION: return "function";
+		case FnType::METHOD: return "method";
 	}
 	return "UNDEFINED";
 }
@@ -54,6 +64,12 @@ Expr* Parser::assignment() {
 			Token name = var->nam;
 			delete var; //subtle, but it doesn't get stored in the parsed tree.
 			return new Assign(name, value);
+		}
+		else if (auto var = dynamic_cast<Get*>(expr)) {
+			Expr* set = new Set(var->obj, var->id, value);
+			var->obj = nullptr; //transfered ownership.
+			delete var;
+			return set;
 		}
 
 		error(equals, "Invalid assignment target.");
@@ -147,6 +163,10 @@ Expr* Parser::call() {
 		if (match({ TokenType::LEFT_PAREN })) {
 			expr = finishCall(expr);
 		}
+		else if (match({ TokenType::DOT })) {
+			Token name = consume(TokenType::IDENTIFIER, "Expect property name after '.'.");
+			expr = new Get(expr, name);
+		}
 		else {
 			break;
 		}
@@ -180,6 +200,8 @@ Expr* Parser::primary() {
 		return new Literal(previous().literal);
 	}
 
+	if (match({ TokenType::THIS })) return new This(previous());
+
 	if (match({ TokenType::IDENTIFIER })) {
 		return new Variable(previous());
 	}
@@ -208,6 +230,7 @@ std::vector<Stmt*> Parser::block() {
 
 Stmt* Parser::declaration() {
 	try {
+		if (match({ TokenType::CLASS })) return classDeclaration();
 		if (match({ TokenType::FUN })) return function(FnType::FUNCTION);
 		if (match({ TokenType::VAR })) return varDeclaration();
 
@@ -219,7 +242,21 @@ Stmt* Parser::declaration() {
 	}
 }
 
-Stmt* Parser::function(FnType fnType) {
+Stmt* Parser::classDeclaration() {
+	Token name = consume(TokenType::IDENTIFIER, "Expect class name.");
+	consume(TokenType::LEFT_BRACE, "Expect '{' before class body.");
+
+	std::vector<Function*> methods;
+	while (!check({ TokenType::RIGHT_BRACE }) && !isAtEnd()) {
+		methods.emplace_back(function(FnType::METHOD));
+	}
+
+	consume(TokenType::RIGHT_BRACE, "Expect '}' after class body.");
+
+	return new Class(name, methods);
+}
+
+Function* Parser::function(FnType fnType) {
 	std::string kind = fnType_toString(fnType);
 	Token name = consume(TokenType::IDENTIFIER, "Expect " + kind + " name.");
 	consume(TokenType::LEFT_PAREN, "Expect '(' after " + kind + " name.");
@@ -238,6 +275,7 @@ Stmt* Parser::function(FnType fnType) {
 
 	consume(TokenType::LEFT_BRACE, "Expect '{' before " + kind + " body.");
 	std::vector<Stmt*> body = block();
+
 	return new Function(name, parameters, body);
 }
 
@@ -377,10 +415,10 @@ void Parser::synchronize() {
 
 Parser::Parser(std::vector<Token>& tokens) : tokens{ tokens }, current{ 0 } {}
 
-std::vector<Stmt*> Parser::parse() {
+ParseResult Parser::parse() {
 	std::vector<Stmt*> statements;
 	while (!isAtEnd()) {
 		statements.push_back(declaration());
 	}
-	return statements;
+	return ParseResult(statements);
 }

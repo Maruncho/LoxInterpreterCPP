@@ -124,10 +124,10 @@ export struct Logical : public Expr {
 
 export struct Set : public Expr {
 	const Expr* obj;
-	const Token op;
+	const Token name;
 	const Expr* val;
 
-	Set(Expr* object, Token oper, Expr* value);
+	Set(const Expr* object, Token name, Expr* value);
 	~Set();
 	Object accept(ExprVisitor<Object>* visitor) const override;
 	void accept(ExprVisitor<void>* visitor) const override;

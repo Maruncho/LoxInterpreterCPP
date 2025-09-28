@@ -17,6 +17,8 @@ Stmt::~Stmt() {}
 Block::Block(std::vector<Stmt*> statements) : stmts{statements} {}
 Block::~Block() {
 	for (Stmt* x : stmts) {
+		if (dynamic_cast<Function*>(x))
+			continue;
 		delete x;
 	}
 }
@@ -25,21 +27,21 @@ void Block::accept(StmtVisitor<void>* visitor) const { return visitor->visitBloc
 
 Function::Function(Token name, std::vector<Token> parameters, std::vector<Stmt*> fnBody)
 	: id{name}, params{parameters}, body{fnBody} { }
+
 Function::~Function() {
 	for (Stmt* x : body) {
+		if (dynamic_cast<Function*>(x))
+			continue;
 		delete x;
 	}
-}
-Function* Function::release() {
-	std::vector<Stmt*> swapped;
-	body.swap(swapped);
-	return new Function(id, params, swapped);
 }
 void Function::accept(StmtVisitor<void>* visitor) const { return visitor->visitFunctionStmt(const_cast<Function*>(this)); }
 
 
-Class::Class(Token name, Variable& superclass, std::vector<Function> methods)
-	: nam{name}, super{superclass.copy()}, meths{std::move(methods)} { }
+//Class::Class(Token name, Variable& superclass, std::vector<Function> methods)
+//	: nam{name}, super{superclass.copy()}, meths{std::move(methods)} { }
+Class::Class(Token name, std::vector<Function*> methods)
+	: nam{name}, meths{std::move(methods)} { }
 void Class::accept(StmtVisitor<void>* visitor) const { return visitor->visitClassStmt(this); }
 
 

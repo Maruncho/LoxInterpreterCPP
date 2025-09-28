@@ -4,7 +4,7 @@ import Resolver;
 
 import Error;
 
-Resolver::Resolver(Interpreter& interpreter) : interpreter{ interpreter } {}
+Resolver::Resolver(Interpreter& interpreter, GC& gc) : interpreter{ interpreter }, gc { gc } {}
 
 void Resolver::resolveLocal(const Expr* expr, Token name) const {
 	for (int i = (int)scopes.size() - 1; i >= 0; i--) {
@@ -70,11 +70,12 @@ void Resolver::visitAssignExpr(const Assign* expr) {
 }
 
 void Resolver::visitGetExpr(const Get* expr) {
-
+	resolve(expr->obj);
 }
 
 void Resolver::visitSetExpr(const Set* expr) {
-
+	resolve(expr->val);
+	resolve(expr->obj);
 }
 
 void Resolver::visitSuperExpr(const Super* expr) {
@@ -82,7 +83,12 @@ void Resolver::visitSuperExpr(const Super* expr) {
 }
 
 void Resolver::visitThisExpr(const This* expr) {
+	if (currentClass == ClassType::NONE) {
+		Error::error(expr->keywrd, "Can't use 'this' outside of a class.");
+		return;
+	}
 
+	resolveLocal(expr, expr->keywrd);
 }
 
 
@@ -120,7 +126,26 @@ void Resolver::visitWhileStmt(const While* stmt) {
 }
 
 void Resolver::visitClassStmt(const Class* stmt) {
+	ClassType enclosingClass = currentClass;
+	currentClass = ClassType::CLASS;
 
+	declare(stmt->nam);
+	define(stmt->nam);
+
+	beginScope();
+	scopes.back()["this"] = true;
+
+	for (Function* method : stmt->meths) {
+		FunctionType declaration = FunctionType::METHOD;
+		if (method->id.lexeme == "init") {
+			declaration = FunctionType::INITIALIZER;
+		}
+		resolveFunction(method, declaration);
+	}
+
+	endScope();
+
+	currentClass = enclosingClass;
 }
 
 void Resolver::visitFunctionStmt(Function* stmt) {
@@ -133,6 +158,9 @@ void Resolver::visitFunctionStmt(Function* stmt) {
 void Resolver::resolveFunction(Function* function, FunctionType type) {
 	beginScope();
 
+	gc.track(function);
+	if (lastFunction) lastFunction->fns_in_body.push_back(function);
+
 	FunctionType enclosingFunction = currentFunction;
 	currentFunction = type;
 
@@ -140,14 +168,25 @@ void Resolver::resolveFunction(Function* function, FunctionType type) {
 		declare(param);
 		define(param);
 	}
+
+	Function* prevLastFunction = lastFunction;
+	lastFunction = function;
+
 	resolve(function->body);
+
+	lastFunction = prevLastFunction;
+
 	endScope();
-	currentFunction = enclosingFunction;
 }
 
 void Resolver::visitReturnStmt(const Return* stmt) {
 	if (currentFunction == FunctionType::NONE) {
 		Error::error(stmt->keywrd, "Can't return from top-level code.");
 	}
-	if (stmt->val) resolve(stmt->val);
+	if (stmt->val) {
+		if (currentFunction == FunctionType::INITIALIZER) {
+			Error::error(stmt->keywrd, "Can't return a value from an initializer.");
+		}
+		resolve(stmt->val);
+	}
 }

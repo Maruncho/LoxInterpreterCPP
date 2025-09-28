@@ -4,41 +4,27 @@ export module Environment;
 import <unordered_map>;
 import <string>;
 import <iostream>;
+import <memory>;
 
 import Object;
 import Token;
 import Error;
 
 export class Environment {
-	Environment* enclosing;
-	std::unordered_map <std::string, Object> values;
-
-	bool isTopLevel = false;
 public:
-	Environment() : enclosing{ nullptr } {}
-	Environment(Environment* enclosing, bool isTopLevel = false) : enclosing{ enclosing }, isTopLevel{ isTopLevel } {
-		//global's enclosing is nullptr, so the environment enclosing global is the toplevel
-	}
+	std::unordered_map <std::string, Object> values;
+	Environment* enclosing;
+	bool isTopLevel = false;
+
+	Environment() : enclosing{ nullptr } { }
+	Environment(Environment* enclosing, bool isTopLevel = false)
+		: enclosing{ enclosing }, isTopLevel{ isTopLevel } { }
 	~Environment() {
-		//std::cout << "Environment got deleted\n";
+		values.clear();
 	}
 
 	Environment(const Environment& other) = delete;
 	Environment(Environment&&) = delete;
-
-	void destroy() {
-		if (!isTopLevel) {
-			delete this;
-		}
-	}
-
-	// fn gets deleted -> environment gets deleted -> fn gets deleted (already deleted) -> bad
-	void destroyWithCircleDependecy(std::string fnName) {
-		values[fnName] = Object();
-		if (!isTopLevel) {
-			delete this;
-		}
-	}
 
 	Environment* ancestor(int distance) {
 		Environment* environment = this;

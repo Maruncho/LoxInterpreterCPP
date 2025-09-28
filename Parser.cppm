@@ -9,10 +9,17 @@ export import Expr;
 export import Stmt;
 import Error;
 
+export struct ParseResult {
+	std::vector<Stmt*> stmts;
+	ParseResult(std::vector<Stmt*> stmts);
+	~ParseResult();
+};
+
 export class ParseError {};
 
 export enum class FnType {
-	FUNCTION
+	FUNCTION,
+	METHOD
 };
 
 export class Parser {
@@ -77,7 +84,9 @@ export class Parser {
 
 	Stmt* declaration();
 
-	Stmt* function(FnType);
+	Stmt* classDeclaration();
+
+	Function* function(FnType);
 
 	Stmt* varDeclaration();
 
@@ -100,5 +109,5 @@ export class Parser {
 public:
 	Parser(std::vector<Token>& tokens);
 
-	std::vector<Stmt*> parse();
+	ParseResult parse();
 };

@@ -45,7 +45,7 @@ void Call::accept(ExprVisitor<void>* visitor) const { return visitor->visitCallE
 Get::Get(Expr* object, Token name)
 	: obj{object}, id{name} { }
 Get::~Get() {
-	//delete obj; obj's primary handle will delete it
+	if(obj) delete obj; //can get nullptr in assign cast to set
 }
 Object Get::accept(ExprVisitor<Object>* visitor) const { return visitor->visitGetExpr(this); }
 void Get::accept(ExprVisitor<void>* visitor) const { return visitor->visitGetExpr(this); }
@@ -76,10 +76,10 @@ Object Logical::accept(ExprVisitor<Object>* visitor) const { return visitor->vis
 void Logical::accept(ExprVisitor<void>* visitor) const { return visitor->visitLogicalExpr(this); }
 
 
-Set::Set(Expr* object, Token oper, Expr* value)
-	: obj{object}, op{oper}, val{value} { }
+Set::Set(const Expr* object, Token name, Expr* value)
+	: obj{object}, name{name}, val{value} { }
 Set::~Set() {
-	//delete obj; obj's primary handler will delete it
+	delete obj; 
 	delete val;
 }
 Object Set::accept(ExprVisitor<Object>* visitor) const { return visitor->visitSetExpr(this); }

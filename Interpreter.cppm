@@ -8,6 +8,7 @@ import Expr;
 import Stmt;
 import Error;
 import Environment;
+import GC;
 
 export struct ReturnFromLoxFn {
 	Object value;
@@ -18,9 +19,9 @@ export struct ReturnFromLoxFn {
 export class Interpreter : public ExprVisitor<Object>, public StmtVisitor<void> {
 public:
 	Environment globals;
-private:
-	Environment topLevel;
 	Environment* environment;
+	GC& gc;
+private:
 
 	std::unordered_map<const Expr*, int> locals;
 
@@ -50,8 +51,13 @@ private:
 
 	Object lookUpVariable(Token name, const Expr* expr);
 
+
 public:
-	Interpreter();
+	Interpreter(GC&);
+	~Interpreter();
+
+	//Function* registerFnRef(Function* stmt);
+	//void unregisterFnRef(Function* stmt);
 
 	void interpret(std::vector<Stmt*> statements);
 

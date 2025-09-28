@@ -75,6 +75,12 @@
     <ClCompile Include="Resolver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GC.cppm">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="example.lox" />

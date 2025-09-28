@@ -52,22 +52,25 @@ export struct Block : public Stmt {
 };
 
 export struct Function : public Stmt {
-	const Token id;
+	Token id;
 	const std::vector<Token> params;
 	std::vector<Stmt*> body;
 
+	//cache for the gc
+	std::vector<Function*> fns_in_body;
+
 	Function(Token name, std::vector<Token> parameters, std::vector<Stmt*> fnBody);
 	~Function();
-	Function* release();
 	void accept(StmtVisitor<void>* visitor) const override;
 };
 
 export struct Class : public Stmt {
 	const Token nam;
-	const Variable& super;
-	const std::vector<Function> meths;
+	//const Variable& super;
+	const std::vector<Function*> meths;
 
-	Class(Token name, Variable& superclass, std::vector<Function> methods);
+	Class(Token name, std::vector<Function*> methods);
+	//Class(Token name, Variable& superclass, std::vector<Function> methods);
 	void accept(StmtVisitor<void>* visitor) const override;
 };
 
