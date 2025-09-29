@@ -38,10 +38,11 @@ Function::~Function() {
 void Function::accept(StmtVisitor<void>* visitor) const { return visitor->visitFunctionStmt(const_cast<Function*>(this)); }
 
 
-//Class::Class(Token name, Variable& superclass, std::vector<Function> methods)
-//	: nam{name}, super{superclass.copy()}, meths{std::move(methods)} { }
-Class::Class(Token name, std::vector<Function*> methods)
-	: nam{name}, meths{std::move(methods)} { }
+Class::Class(Token name, Variable* superclass, std::vector<Function*> methods)
+	: nam{name}, super{superclass}, meths{std::move(methods)} { }
+Class::~Class() {
+	if (super) delete super;
+}
 void Class::accept(StmtVisitor<void>* visitor) const { return visitor->visitClassStmt(this); }
 
 

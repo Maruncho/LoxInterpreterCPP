@@ -86,6 +86,7 @@ public:
 	inline bool isString() const { return std::holds_alternative<std::string>(val); }
 	inline bool isNil() const { return std::holds_alternative<std::monostate>(val); }
 	inline bool isCallable() const { return std::holds_alternative<LoxCallable*>(val); }
+	bool isClass() const;
 	inline bool isLoxInstance() const { return std::holds_alternative<LoxInstance*>(val); }
 
 	inline bool isPointer() const { return std::holds_alternative<LoxCallable*>(val) || std::holds_alternative<LoxInstance*>(val); }
@@ -133,7 +134,8 @@ export class LoxClass : public LoxCallable {
 public:
 	std::unordered_map<std::string, LoxFn*> methods;
 	const std::string name;
-	LoxClass(std::string name, std::unordered_map<std::string, LoxFn*> methods);
+	LoxClass* superclass;
+	LoxClass(std::string name, LoxClass* superclass, std::unordered_map<std::string, LoxFn*> methods);
 
 	LoxFn* findMethod(std::string name);
 

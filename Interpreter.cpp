@@ -76,12 +76,12 @@ void Interpreter::interpret(std::vector<Stmt*> statements) {
 			gc.runFromEnv(environment);
 		}
 
-		locals.clear();
+		//locals.clear();
 	}
 	catch (Error::RuntimeError& error) {
 		Error::runtimeError(error);
 
-		locals.clear();
+		//locals.clear();
 	}
 }
 
@@ -228,7 +228,20 @@ Object Interpreter::visitSetExpr(const Set* expr) {
 	return value;
 }
 
-Object Interpreter::visitSuperExpr(const Super* expr) { return Object(); }
+Object Interpreter::visitSuperExpr(const Super* expr) {
+	int distance = locals[expr];
+	LoxClass* superclass = (LoxClass*)environment->getAt(distance, "super").getCallablePtr();
+
+	LoxInstance* object = environment->getAt(distance - 1, "this").getLoxInstancePtr();
+
+	LoxFn* method = superclass->findMethod(expr->meth.lexeme);
+
+	if (!method) {
+		throw Error::RuntimeError(expr->meth, "Undefined property '" + expr->meth.lexeme + "'.");
+	}
+
+	return method->bind(object);
+}
 
 Object Interpreter::visitThisExpr(const This* expr) {
 	return lookUpVariable(expr->keywrd, expr);
@@ -287,7 +300,20 @@ void Interpreter::visitReturnStmt(const Return* stmt) {
 }
 
 void Interpreter::visitClassStmt(const Class* stmt) {
+	Object superclass = Object();
+	if (stmt->super) {
+		superclass = evaluate(stmt->super);
+		if (!superclass.isClass()) {
+			throw Error::RuntimeError(stmt->super->nam, "Superclass must be a class.");
+		}
+	}
+
 	environment->define(stmt->nam.lexeme, Object());
+
+	if (stmt->super) {
+		environment = gc.track(new Environment(environment));
+		environment->define("super", superclass);
+	}
 
 	std::unordered_map<std::string, LoxFn*> methods;
 	for (Function* method : stmt->meths) {
@@ -296,6 +322,13 @@ void Interpreter::visitClassStmt(const Class* stmt) {
 		methods[method->id.lexeme] = function;
 	}
 
-	Object klass = gc.track(new LoxClass(stmt->nam.lexeme, methods));
+	LoxClass* super = superclass.isNil() ? nullptr : (LoxClass*)superclass.getCallablePtr();
+
+	Object klass = gc.track(new LoxClass(stmt->nam.lexeme, super, methods));
+
+	if (super) {
+		environment = environment->enclosing;
+	}
+
 	environment->assign(stmt->nam, klass);
 }

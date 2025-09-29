@@ -26,6 +26,8 @@ Object::Object(LoxCallable* fn) : val{ fn } {}
 Object::Object(LoxInstance* inst) : val{ inst } { }
 //Object::Object(std::variant<double, bool, std::string, std::monostate, LoxCallable*, LoxInstance*> val) : val{ val } { }
 
+bool Object::isClass() const { return std::holds_alternative<LoxCallable*>(val) && dynamic_cast<LoxClass*>(std::get<LoxCallable*>(val)); }
+
 LoxInstance::LoxInstance(LoxClass* klass) : klass{ klass } { }
 
 Object LoxInstance::get(Token name) {
@@ -97,13 +99,17 @@ std::string LoxFn::toString() const {
 }
 
 
-LoxClass::LoxClass(std::string name, std::unordered_map<std::string, LoxFn*> methods)
-	: name{ name }, methods{ methods } { }
+LoxClass::LoxClass(std::string name, LoxClass* superclass, std::unordered_map<std::string, LoxFn*> methods)
+	: name{ name }, superclass{ superclass },  methods { methods } { }
 
 
 LoxFn* LoxClass::findMethod(std::string name) {
 	if (methods.contains(name)) {
 		return methods[name];
+	}
+
+	if (superclass) {
+		return superclass->findMethod(name);
 	}
 
 	return nullptr;

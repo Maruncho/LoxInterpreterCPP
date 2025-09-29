@@ -79,7 +79,14 @@ void Resolver::visitSetExpr(const Set* expr) {
 }
 
 void Resolver::visitSuperExpr(const Super* expr) {
+	if (currentClass == ClassType::NONE) {
+		Error::error(expr->keywrd, "Can't use 'super' outside of a class.");
+	}
+	else if (currentClass != ClassType::SUBCLASS) {
+		Error::error(expr->keywrd, "Can't use 'super' in a class with no superclass.");
+	}
 
+	resolveLocal(expr, expr->keywrd);
 }
 
 void Resolver::visitThisExpr(const This* expr) {
@@ -132,6 +139,20 @@ void Resolver::visitClassStmt(const Class* stmt) {
 	declare(stmt->nam);
 	define(stmt->nam);
 
+	if (stmt->super && stmt->nam.lexeme == stmt->super->nam.lexeme) {
+		Error::error(stmt->super->nam, "A class can't inherit from itself.");
+	}
+
+	if (stmt->super) {
+		currentClass = ClassType::SUBCLASS;
+		resolve(stmt->super);
+	}
+
+	if (stmt->super) {
+		beginScope();
+		scopes.back()["super"] = true;
+	}
+
 	beginScope();
 	scopes.back()["this"] = true;
 
@@ -144,6 +165,8 @@ void Resolver::visitClassStmt(const Class* stmt) {
 	}
 
 	endScope();
+
+	if (stmt->super) endScope();
 
 	currentClass = enclosingClass;
 }

@@ -66,11 +66,11 @@ export struct Function : public Stmt {
 
 export struct Class : public Stmt {
 	const Token nam;
-	//const Variable& super;
+	const Variable* super;
 	const std::vector<Function*> meths;
 
-	Class(Token name, std::vector<Function*> methods);
-	//Class(Token name, Variable& superclass, std::vector<Function> methods);
+	Class(Token name, Variable* superclass, std::vector<Function*> methods);
+	~Class();
 	void accept(StmtVisitor<void>* visitor) const override;
 };
 

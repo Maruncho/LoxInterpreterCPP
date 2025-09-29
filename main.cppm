@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
 	Interpreter interpreter = Interpreter(gc);
 
 	if (argc > 2) {
-		std::cout << "Usage: cpplox [script]\n";
+		std::cout << "Usage: LoxInterpreterCPP [script]\n";
 		return 64;
 	}
 	else if (argc == 2) {
@@ -72,10 +72,5 @@ int main(int argc, char* argv[]) {
 		runPrompt(interpreter, gc);
 	}
 	
-
-	while (true) {
-		runFile("example.lox", interpreter, gc);
-	}
-
 	gc.deleteAll();
 }

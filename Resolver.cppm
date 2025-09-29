@@ -19,7 +19,8 @@ enum class FunctionType {
 
 enum class ClassType {
 	NONE,
-	CLASS
+	CLASS,
+	SUBCLASS
 };
 
 export class Resolver : public ExprVisitor<void>, public StmtVisitor<void> {

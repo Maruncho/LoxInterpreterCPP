@@ -96,6 +96,8 @@ void GC::mark(void* void_ptr, Data& data) {
 		case Type::LOXCLASS: {
 			LoxClass* ptr = (LoxClass*)void_ptr;
 
+			if(ptr->superclass) markOne(ptr->superclass);
+
 			for (const auto& [_, value] : ptr->methods) {
 				markOne(value);
 			}

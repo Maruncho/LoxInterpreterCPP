@@ -200,6 +200,13 @@ Expr* Parser::primary() {
 		return new Literal(previous().literal);
 	}
 
+	if (match({ TokenType::SUPER })) {
+		Token keyword = previous();
+		consume(TokenType::DOT, "Expect '.' after 'super'.");
+		Token method = consume(TokenType::IDENTIFIER, "Expect superclass method name.");
+		return new Super(keyword, method);
+	}
+
 	if (match({ TokenType::THIS })) return new This(previous());
 
 	if (match({ TokenType::IDENTIFIER })) {
@@ -244,6 +251,13 @@ Stmt* Parser::declaration() {
 
 Stmt* Parser::classDeclaration() {
 	Token name = consume(TokenType::IDENTIFIER, "Expect class name.");
+
+	Variable* superclass = nullptr;
+	if (match({ TokenType::LESS })) {
+		consume(TokenType::IDENTIFIER, "Expect superclass name.");
+		superclass = new Variable(previous());
+	}
+
 	consume(TokenType::LEFT_BRACE, "Expect '{' before class body.");
 
 	std::vector<Function*> methods;
@@ -253,7 +267,7 @@ Stmt* Parser::classDeclaration() {
 
 	consume(TokenType::RIGHT_BRACE, "Expect '}' after class body.");
 
-	return new Class(name, methods);
+	return new Class(name, superclass, methods);
 }
 
 Function* Parser::function(FnType fnType) {
