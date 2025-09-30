@@ -15,70 +15,70 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cppm">
+    <ClCompile Include="src\main.cppm">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Token.cpp">
+    <ClCompile Include="src\Token.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Scanner.cpp">
+    <ClCompile Include="src\Scanner.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
-    <ClCompile Include="Error.cppm">
+    <ClCompile Include="src\Error.cppm">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Expr.cppm">
+    <ClCompile Include="src\Expr.cppm">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Stmt.cppm">
+    <ClCompile Include="src\Stmt.cppm">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Parser.cpp">
+    <ClCompile Include="src\Parser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Object.cppm">
+    <ClCompile Include="src\Object.cppm">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Interpreter.cpp">
+    <ClCompile Include="src\Interpreter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Environment.cppm">
+    <ClCompile Include="src\Environment.cppm">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Token.cppm">
+    <ClCompile Include="src\Token.cppm">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Stmt.cpp">
+    <ClCompile Include="src\Stmt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Scanner.cppm">
+    <ClCompile Include="src\Scanner.cppm">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Parser.cppm">
+    <ClCompile Include="src\Parser.cppm">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Interpreter.cppm">
+    <ClCompile Include="src\Interpreter.cppm">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Expr.cpp">
+    <ClCompile Include="src\Expr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Object.cpp">
+    <ClCompile Include="src\Object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NativeFunctions.cppm">
+    <ClCompile Include="src\NativeFunctions.cppm">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Resolver.cppm">
+    <ClCompile Include="src\Resolver.cppm">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Resolver.cpp">
+    <ClCompile Include="src\Resolver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GC.cppm">
+    <ClCompile Include="src\GC.cppm">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GC.cpp">
+    <ClCompile Include="src\GC.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

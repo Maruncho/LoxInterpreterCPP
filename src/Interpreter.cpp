@@ -73,7 +73,6 @@ void Interpreter::interpret(std::vector<Stmt*> statements) {
 	try {
 		for (const Stmt* statement : statements) {
 			execute(statement);
-			gc.runFromEnv(environment);
 		}
 
 		//locals.clear();

@@ -31,6 +31,7 @@ private:
 
 	inline void execute(const Stmt* stmt) {
 		stmt->accept(this);
+		gc.runFromEnv(environment);
 	}
 
 	bool isTruthy(Object obj);

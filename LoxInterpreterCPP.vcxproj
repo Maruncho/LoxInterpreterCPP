@@ -70,6 +70,13 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TargetName>cpplox</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetName>cpplox</TargetName>
+    <OutDir>$(SolutionDir)build</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -104,7 +111,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -129,30 +136,30 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Environment.cppm" />
-    <ClCompile Include="Error.cppm" />
-    <ClCompile Include="Expr.cpp" />
-    <ClCompile Include="Expr.cppm" />
-    <ClCompile Include="GC.cpp" />
-    <ClCompile Include="GC.cppm" />
-    <ClCompile Include="Interpreter.cpp" />
-    <ClCompile Include="Interpreter.cppm" />
-    <ClCompile Include="main.cppm" />
-    <ClCompile Include="NativeFunctions.cppm" />
-    <ClCompile Include="Object.cpp" />
-    <ClCompile Include="Object.cppm" />
-    <ClCompile Include="Parser.cpp" />
-    <ClCompile Include="Parser.cppm" />
-    <ClCompile Include="Resolver.cpp" />
-    <ClCompile Include="Resolver.cppm" />
-    <ClCompile Include="Scanner.cppm" />
-    <ClCompile Include="Stmt.cpp" />
-    <ClCompile Include="Stmt.cppm" />
-    <ClCompile Include="Token.cpp" />
-    <ClCompile Include="Token.cppm" />
+    <ClCompile Include="src\Environment.cppm" />
+    <ClCompile Include="src\Error.cppm" />
+    <ClCompile Include="src\Expr.cpp" />
+    <ClCompile Include="src\Expr.cppm" />
+    <ClCompile Include="src\GC.cpp" />
+    <ClCompile Include="src\GC.cppm" />
+    <ClCompile Include="src\Interpreter.cpp" />
+    <ClCompile Include="src\Interpreter.cppm" />
+    <ClCompile Include="src\main.cppm" />
+    <ClCompile Include="src\NativeFunctions.cppm" />
+    <ClCompile Include="src\Object.cpp" />
+    <ClCompile Include="src\Object.cppm" />
+    <ClCompile Include="src\Parser.cpp" />
+    <ClCompile Include="src\Parser.cppm" />
+    <ClCompile Include="src\Resolver.cpp" />
+    <ClCompile Include="src\Resolver.cppm" />
+    <ClCompile Include="src\Scanner.cppm" />
+    <ClCompile Include="src\Stmt.cpp" />
+    <ClCompile Include="src\Stmt.cppm" />
+    <ClCompile Include="src\Token.cpp" />
+    <ClCompile Include="src\Token.cppm" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Scanner.cpp">
+    <ClCompile Include="src\Scanner.cpp">
       <FileType>Document</FileType>
     </ClCompile>
   </ItemGroup>
